@@ -1,24 +1,66 @@
 """
 Task: https://app.swaggerhub.com/apis/c4412/croc-gamification/1.0.0#/auction/addAuctionState
 """
-
-from argparse import Action
-from urllib import request
 from fastapi import FastAPI, Depends
 from app.shemas import *
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from app.database import engine
-from app.database import get_db
+from fastapi import APIRouter
+from app.database import SessionLocal
 from app.models import *
 from random import randint
 import json
 
-
-Base.metadata.create_all(bind=engine)
+router_bus = APIRouter()
 app = FastAPI()
 
+CAPACITY = (10, 50, 100)
 
+
+@router_bus.get("/bus_counter")
+async def get_bus_count():
+    db = SessionLocal()
+    answer = {}
+
+    for cap in CAPACITY:
+        answer[cap] = {}
+        q_free = select(Bus).filter(Bus.state == "waiting")
+        q_busy = select(Bus).filter(Bus.state != "waiting" and Bus.state != "failed")
+        q_failed = select(Bus).filter(Bus.state == "failed")
+        answer[cap]["free"] = len(db.execute(q_free).all())
+        answer[cap]["busy"] = len(db.execute(q_busy).all())
+        answer[cap]["failed"] = len(db.execute(q_failed).all())
+
+    return answer
+
+
+@router_bus.get("/all")
+async def get_bus_all():
+    db = SessionLocal()
+    busses = db.execute(select(Bus))
+    result = []
+    for b in busses:
+        result.append(BusSchema.from_orm(b))
+    return result
+
+
+#
+@router_bus.get("/journal/{id}")
+async def get_journal(bus_id: int):
+    db = SessionLocal()
+    q = select(Task).where(bus_id=bus_id)
+    r = db.execute(q).all()
+    journals = [
+        db.execute(select(Journal).where(id=i.journal)).one_or_none() for i in r
+    ]
+    return journals
+
+
+# TODO: полеты с журналами и автобусами
+app.include_router(router_bus, prefix="/bus", tags=["bus"])
+
+router_flight = APIRouter()
+# @router_flight.get("/all ")
 # @app.get("/")
 # def read_root():
 #     return {"Hello": "World"}

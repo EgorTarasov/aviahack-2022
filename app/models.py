@@ -4,6 +4,14 @@ from sqlalchemy.dialects import postgresql
 from .database import Base
 
 
+class Journal(Base):
+    __tablename__ = "journal"
+    id = Column(Integer, primary_key=True)
+    flight = Column(Integer, ForeignKey("flight.number"))
+    currentTask = Column(Integer)
+
+
+
 class Flight(Base):
     __tablename__ = "flight"
     number = Column(Integer, primary_key=True)
@@ -25,6 +33,7 @@ class Flight(Base):
 class Bus(Base):
     __tablename__ = "bus"
     id = Column(Integer, primary_key=True)
+    capacity = Column(Integer)
     state = Column(String)
 
 
@@ -36,29 +45,19 @@ class Road(Base):
     distance = Column(Integer)
 
 
-class BusState(Base):
-    __tablename__ = "bus_state"
-    id = Column(Integer, primary_key=True)
-    label = Column(String)
-    duration = Column(Integer)
-    order = Column(Integer)
-
-
 class Task(Base):
     __tablename__ = "task"
     id = Column(Integer, primary_key=True)
-    journal = Column(Integer, ForeignKey("flight.number"))
+    journal = Column(Integer, ForeignKey("journal.id"))
     taskState = Column(String)
     busState = Column(String)
     bus_id = Column(Integer, ForeignKey("bus.id"))
     distance = Column(Integer)  # метры
-    flight = Column(String)
     startPoint = Column(Integer)  # id точки начала
     endPoint = Column(Integer)
 
 
-class Mission(Base):
-    __tablename__ = "missions"
-
-    mission_id = Column(Integer, primary_key=True, nullable=False)
-    json_data = Column(postgresql.JSON())
+class Point(Base):
+    __tablename__ = "points"
+    pointId = Column(String, primary_key=True)
+    locationId = Column(String)
