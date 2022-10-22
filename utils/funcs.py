@@ -30,6 +30,7 @@ def build_graph(db_path="db.sqlite3"):
         point = []
         for _, data in df.items():
             point.append(data[j])
+        print(point)
         graph.add_edge(point[1], point[2], (point[3], point[0]))
     return graph
 
@@ -45,7 +46,7 @@ def load_graph(path="2.xlsx", path_db="db.sqlite3"):
     df = pd.read_excel(path, sheet_name="Roads")
     df = df.rename(columns={"road_id": "id",	"source_point_id": "sourceId", "target_point_id": "targetId", "distance": "distance"})
     df2 = pd.read_excel(path, sheet_name="Points")
-    df = df2.rename(columns={"point_id": "pointId", "location_id": "locationId"})
+    df2 = df2.rename(columns={"point_id": "pointId", "location_id": "locationId"})
     cursor = connection.cursor()
     drop_query = ''' 
             DROP TABLE IF EXISTS roads;
@@ -70,7 +71,6 @@ def load_timetable(path="../files/1.xlsx", path_db="db.sqlite3"):
     for y in range(len(date)):
         datetime.append(date[y] + " " + str(time[y]))
     df.insert(1, "datetime", datetime)
-    print(df.head())
     cursor = connection.cursor()
     drop_query = '''
     DROP TABLE IF EXISTS flight;
@@ -86,3 +86,18 @@ def make_route(start_point, destination_point, path_timetable="../files/1.xlsx",
     path_to_destination = find_path(graph, start_point, destination_point, cost_func=cost_func)
     return path_to_destination
 
+
+def find_buses(buses, destination, path_timetable="../files/1.xlsx", path_graph="../files/2.xlsx"):
+    results = pd.df(columns=["id", "result", "route"])
+    for bus in buses:
+        if state == ""
+        info = make_route(bus["point"], destination, path_timetable="../files/1.xlsx", path_graph="../files/2.xlsx")
+        route = ""
+        for i in info["edges"]:
+            route += str(i[1]) + ", "
+        results = results.append(bus["id"], info["total_cost"], route)
+    results.sort_values("total_cost", axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None)
+
+
+
+make_route(850, 849)
