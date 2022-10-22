@@ -1,5 +1,4 @@
-from loader import Base
-from models import *
-from loader import SessionLocal
+from .models import *
+from .loader import SessionLocal, Base, engine
 
-Base.metadata.create_all()
+Base.metadata.create_all(bind=engine)

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import postgresql
-from loader import Base
+from .loader import Base
 
 
 class Journal(Base):
