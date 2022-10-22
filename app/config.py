@@ -1,4 +1,4 @@
-DATABASE_URL = "postgresql://test_user:test_password@localhost:5432/test"
+  # "postgresql://test_user:test_password@localhost:5432/test"
 # "postgresql://postgres:postgres@localhost:5433/crocDb"
 # POSTGRES_PASSWORD = "postgres"
 d = "postgres"
