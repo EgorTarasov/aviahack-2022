@@ -7,19 +7,14 @@ class User(Model):
     phone_number = fields.CharField(null=True, max_length=12)
     email = fields.CharField(unique=True, max_length=512)
     auth_token = fields.CharField(null=True, max_length=1024)
-    avatar = fields.CharField(null=True, max_length=512)
     hashed_password = fields.CharField(max_length=512)
+    role = fields.CharField(max_length=256)
 
     def __repr__(self):
         return str(self.fio)
 
     class PydanticMeta:
         exclude = ["hashed_password"]
-
-
-class Driver(User):
-    bus_id = fields.IntField()
-
 
 
 class Token(Model):

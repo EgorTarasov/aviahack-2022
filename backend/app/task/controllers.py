@@ -1,19 +1,30 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from .models import Goal, Task
-from .schemas import GoalSchema, CreateGoal, DeleteSuccess
+# from .models import Task
+from .schemas import DeleteSuccess
+from .models import Flight, Journal
+from ..users.auth import get_user
+from ..users.models import User
 
-# from backend.app.users.auth import get_user
-# from backend.app.users.models import User
-#
 router = APIRouter()
-#
-# # Goal routes
-#
-#
-# async def check_goal(id: str, user: User = Depends(get_user)):
-#
-#     goal = await Goal.get_or_none(id=id, user=user)
+
+# Task routes
+# TODO: получить все автобусы с их статусами свободен/занят, точка
+# TODO: Все журналы по id автобуса
+# TODO: список всех полетов и всех журналов по полету
+# TODO: статус автобуса по времени
+# TODO: полеты (pending)
+
+
+
+@router.get("/bus/all")
+async def get_bus_all():
+    bus = await Journal.flight.all()
+
+
+#     return
+# async def check_task(id: str, user: User = Depends(get_user)):
+#     task = await Task.get_or_none(id=id, user=)
 #     if goal is None:
 #         raise HTTPException(404, 'Item not found')
 #     return goal

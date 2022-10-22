@@ -3,21 +3,29 @@ from tortoise import fields, Model
 
 class Task(Model):
     id = fields.UUIDField(pk=True)
+    journal = fields.ForeignKeyField("task.Journal", related_name="tasks")
+    scheduledTime = fields.IntField()
     taskState = fields.CharField(max_length=256)
-    busState = fields.JSONField()
-    driver = fields.UUIDField()
+    bus = fields.IntField()
     distance = fields.IntField()  # метры
     flight = fields.CharField(max_length=256)
-    startPoint = fields.IntField()  # id точки начала
-    endPoint = fields.IntField()
+    # startPoint = fields.IntField()  # id точки начала
+    # endPoint = fields.IntField()
+
+
+class Journal(Model):
+    id: int
+    flight = fields.ForeignKeyField("task.Flight", related_name="journals")
+    currentTask: int
+    # Tasks: [Task]
 
 
 class Flight(Model):
+    number = fields.IntField(pk=True)
     date = fields.IntField()  # Unixtime
     type = fields.CharField(max_length=256)  # A - прилет, D - вылет
     terminal = fields.CharField(max_length=256)
     # код авиакомпании
-    number = fields.IntField()
     scheduledTime = fields.IntField()
     airportCode = fields.CharField(max_length=256)
     airport = fields.CharField(max_length=256)
@@ -25,6 +33,9 @@ class Flight(Model):
     parkingId = fields.CharField(max_length=256)
     gateId = fields.CharField(max_length=256)
     passengersCount = fields.IntField()
+
+    class Meta:
+        ordering = ["date"]
 
 
 class Point(Model):
@@ -41,7 +52,10 @@ class Road(Model):
 
 class Bus(Model):
     id = fields.UUIDField(pk=True)
+    driver = fields.UUIDField(null=True)
+    journal = fields.ForeignKeyField("task.Journal", "bus")
     state = fields.CharField(max_length=256)
+    point = fields.CharField(max_length=256)
 
 
 class BusState(Model):
@@ -50,11 +64,3 @@ class BusState(Model):
     order = (
         fields.IntField()
     )  # порядок состояния (посадка -> движение -> высадка, ожидание)
-
-
-class Goal(Model):
-    id = fields.UUIDField(pk=True)
-    name = fields.TextField()
-    # tasks = fields.ManyToManyField('models.Task', related_name='tasks', through='goal_task')
-
-    user = fields.ForeignKeyField("users.User", related_name="goals")
