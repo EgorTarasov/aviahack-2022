@@ -1,9 +1,7 @@
-DATABASE_URL = "sqlite:///foo.db"
-# "postgresql://test_user:test_password@94.45.223.241:46873/testDb"
-# "sqlite:///foo.db"
+DATABASE_URL = "postgresql://test_user:test_password@localhost:5432/test"
 # "postgresql://postgres:postgres@localhost:5433/crocDb"
 # POSTGRES_PASSWORD = "postgres"
-# d = "postgres"
+d = "postgres"
 """postgres docker start"""
 # docker run --name crocdb -p 5433:5432 -e POSTGRES_PASSWORD=postgres -d postgres
 
