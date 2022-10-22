@@ -1,6 +1,6 @@
 import pandas as pd
 import sqlite3
-from dijkstra import Graph
+from dijkstar import Graph, find_path
 
 
 def create_connection(path):
@@ -21,11 +21,26 @@ def build_graph(db_path="baza.db"):
     sql_query = pd.read_sql_query('''
                                    SELECT
                                    *
-                                   FROM products
+                                   FROM roads
                                    ''', conn)
 
-    df = pd.DataFrame(sql_query, columns=['product_id', 'product_name', 'price'])
-    print(df)
+    df = pd.DataFrame(sql_query)
+    xx = 0
+    for _, x in df.items():
+        xx = len(x)
+        break
+    for j in range(xx):
+        point = []
+        for _, data in df.items():
+            point.append(data[j])
+        graph.add_edge(point[1], point[2], (point[3], point[0]))
+    return graph
+
+
+def cost_func(u, v, edge, prev):
+    length, name = edge
+    cost = length
+    return cost
 
 
 def load_graph(path="2.xlsx", path_db="baza.db"):
@@ -60,5 +75,9 @@ def load_timetable(path="baza.db"):
     df.to_sql("flights", connection, index=False)
 
 
-load_timetable("../files/1.xlsx")
-load_graph("../files/2.xlsx")
+def make_route(start_point, destination_point, path_timetable="../files/1.xlsx", path_graph="../files/2.xlsx"):
+    load_timetable(path_timetable)
+    load_graph(path_graph)
+    graph = build_graph()
+    path_to_destination = find_path(graph, start_point, destination_point, cost_func=cost_func)
+    return path_to_destination
