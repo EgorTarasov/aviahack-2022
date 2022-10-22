@@ -10,20 +10,17 @@ def create_connection(path):
         print("Connection to SQLite DB successful")
     except sqlite3.Error as e:
         print(f"The error '{e}' occurred")
-
     return connection
 
 
 def build_graph(db_path="baza.db"):
     graph = Graph()
     conn = sqlite3.connect(db_path)
-
     sql_query = pd.read_sql_query('''
                                    SELECT
                                    *
                                    FROM roads
                                    ''', conn)
-
     df = pd.DataFrame(sql_query)
     xx = 0
     for _, x in df.items():
@@ -58,10 +55,6 @@ def load_graph(path="2.xlsx", path_db="baza.db"):
     cursor.execute(drop_query1)
     df.to_sql("roads", connection, index=False)
     df2.to_sql("points", connection, index=False)
-
-
-def load_data():
-    pass
 
 
 def load_timetable(path="baza.db"):
