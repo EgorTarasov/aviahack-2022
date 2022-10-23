@@ -21,6 +21,9 @@ class Flight(Base):
     gateId = Column(String)
     passengersCount = Column(Integer)
 
+    def __lt__(self, other):
+        return self.scheduledTime < other.scheduledTime
+
 
 class Bus(Base):
     __tablename__ = "bus"
@@ -38,7 +41,6 @@ class Road(Base):
     distance = Column(Integer)
 
 
-
 class Task(Base):
     __tablename__ = "task"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -50,6 +52,9 @@ class Task(Base):
     distance = Column(Integer)  # метры
     startPoint = Column(Integer)  # Integer -> String
     endPoint = Column(Integer)  # Integer -> String
+
+    def __lt__(self, other):
+        return self.startTime + self.duration < other.startTime + other.duration
 
 
 class Point(Base):
@@ -67,6 +72,7 @@ class TaskScheme(BaseModel):
     startPoint: str
     endPoint: str
 
+
 class BusScheme(BaseModel):
     id: int
     capacity: int
@@ -74,4 +80,4 @@ class BusScheme(BaseModel):
     state: str
 
     class Config():
-        orm_mode=True
+        orm_mode = True
