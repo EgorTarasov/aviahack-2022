@@ -71,6 +71,7 @@ class Controller:
                         self, start_point.locationId, _expeption)
                     bus = session.query(Bus).filter_by(id=bus_id).one_or_none()
                     if bus is None:
+                        # или ждем изменений от диспетчера
                         tasks = session.query(Task).all()
                         tasks.sort()
                         delay = (tasks[0].startTime +
