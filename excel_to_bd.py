@@ -50,13 +50,21 @@ def main():
         Session.flush()
 
     df = pd.read_excel("points.xlsx", sheet_name="Points")
+    c = 0
+    values = []
     for index, row in df.iterrows():
         pointId, locationId = row
-        point = Session.query(Point).filter_by(pointId=pointId).one_or_none()
+        locationId = str(locationId)
+        values.append((pointId, locationId))
+        c += 1
+        point = Session.query(Point).filter_by(locationId=locationId).one_or_none()
         if point is None:
             point = Point(pointId=pointId, locationId=locationId)
         Session.add(point)
         Session.flush()
+    print(c)
+    print(values)
+    exit(0)
 
     df = pd.read_excel("points.xlsx", sheet_name="Roads")
     for index, row in df.iterrows():

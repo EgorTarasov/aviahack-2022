@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Json, Field
+from typing import Optional
 from time import time
 
 
@@ -9,7 +10,6 @@ class BusSchema(BaseModel):
 
     class Config:
         orm_mode = True
-
 
 
 class FlightSchema(BaseModel):
@@ -31,12 +31,16 @@ class FlightSchema(BaseModel):
     class Config:
         orm_mode = True
 
+
 class TaskScheme(BaseModel):
     id: int
-    journal: int
-    taskState: str
-    busStat: str
+    flight_id: int
+    startTime: int
+    endTime: Optional[int]
     bus_id: int
     distance: int
     startPoint: int
-    endPoint: str
+    endPoint: int
+
+    class Config:
+        orm_mode = True

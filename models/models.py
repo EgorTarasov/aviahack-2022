@@ -1,13 +1,7 @@
-from sqlalchemy import Column, Integer, String, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, JSON, ForeignKey, Boolean
 from .loader import Base
-
-
-class Journal(Base):
-    __tablename__ = "journal"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    flight = Column(Integer, ForeignKey("flight.id"))
-    currentTask = Column(Integer)
-    bus_id = Column(Integer, ForeignKey("bus.id"))
+from pydantic import BaseModel, Json, Field
+from time import time
 
 
 class Flight(Base):
@@ -33,8 +27,8 @@ class Bus(Base):
     __tablename__ = "bus"
     id = Column(Integer, primary_key=True, autoincrement=True)
     capacity = Column(Integer)
-    point = Column(String)
-    state = Column(String)
+    point = Column(Integer)
+    state = Column(Boolean)
 
 
 class Road(Base):
@@ -45,12 +39,15 @@ class Road(Base):
     distance = Column(Integer)
 
 
+
 class Task(Base):
     __tablename__ = "task"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    journal = Column(Integer, ForeignKey("journal.id"))
-    # taskState = Column(String)
-    busState = Column(String)
+    flight_id = Column(Integer, ForeignKey("flight.id"))
+    startTime = Column(Integer,  nullable=True)
+    duration = Column(Integer, nullable=True)
+    endTime = Column(Integer, nullable=True)
+    bus_id = Column(Integer, ForeignKey("bus.id"))
     distance = Column(Integer)  # метры
     startPoint = Column(Integer)  # Integer -> String
     endPoint = Column(Integer)  # Integer -> String
@@ -60,3 +57,22 @@ class Point(Base):
     __tablename__ = "points"
     pointId = Column(Integer)
     locationId = Column(String, primary_key=True)
+
+
+class TaskScheme(BaseModel):
+    id: int
+    bus_id: int
+    bus_capacity: int
+    duration: int
+    distance: int
+    startPoint: str
+    endPoint: str
+
+class BusScheme(BaseModel):
+    id: int
+    capacity: int
+    point: int
+    state: str
+
+    class Config():
+        orm_mode=True
