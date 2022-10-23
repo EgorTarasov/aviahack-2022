@@ -1,0 +1,20 @@
+.tasks-title {
+    color: #fff !important;
+}
+
+.home-statistics {
+    &__title {
+        color: #a56326 !important;
+        font-weight: 900;
+    }
+    &__desc {
+        color: #fff;
+        margin-left: 5px;
+    }
+    &__info {
+        margin-top: 7px;
+    }
+    &__badge > sup {
+        box-shadow: none;
+    }
+}
