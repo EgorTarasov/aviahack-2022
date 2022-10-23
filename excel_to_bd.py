@@ -62,9 +62,6 @@ def main():
             point = Point(pointId=pointId, locationId=locationId)
         Session.add(point)
         Session.flush()
-    print(c)
-    print(values)
-    exit(0)
 
     df = pd.read_excel("points.xlsx", sheet_name="Roads")
     for index, row in df.iterrows():
@@ -98,7 +95,7 @@ def place_busses():
             point = random.choice(points)
             if bus is None:
                 bus = Bus(
-                    id=bus_id, capacity=_capacity, state="waiting", point=point.pointId
+                    id=bus_id, capacity=_capacity, state=True, point=point.pointId
                 )
 
             Session.add(bus)

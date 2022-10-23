@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
 from .loader import Base
 from pydantic import BaseModel, Json, Field
 from time import time
@@ -19,8 +20,6 @@ class Flight(Base):
     parkingId = Column(String)
     gateId = Column(String)
     passengersCount = Column(Integer)
-
-    # journal = relationship("Task")
 
 
 class Bus(Base):
