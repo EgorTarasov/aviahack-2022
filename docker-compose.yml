@@ -3,12 +3,18 @@ services:
   postgres:
     image: postgres:13.3
     environment:
-      POSTGRES_DB: "test2"
-      POSTGRES_USER: "test_user"
-      POSTGRES_PASSWORD: "test_password"
+      POSTGRES_DB: "prod_db"
+      POSTGRES_USER: "prod_user"
+      POSTGRES_PASSWORD: "production"
     ports:
-        - "5432:5432"
+        - "46873:5432"
   web:
+    depends_on:
+        - "postgres"
     build: .
     ports:
-        - "8000:80"
+        - "8002:8000"
+    environment:
+        - DATABASE_URL=postgresql://prod_user:production@db:46873/prod_db
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
