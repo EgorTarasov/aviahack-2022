@@ -15,6 +15,9 @@ class Controller:
         # if loop is None:
         #     loop = asyncio.new_event_loop()
         # asyncio.set_event_loop(loop)
+
+        self.is_operated = True
+
         self.graph = Graph()
         road_list = session.query(Road).all()
 
@@ -26,96 +29,105 @@ class Controller:
             session.query(Flight).order_by(desc(Flight.scheduledTime)).all()
         )
 
+    def warn_operator(self, timee):
+        if time.time() - timee > 30: #раз в 30 секунд, если не появились новые рейсы
+            # Всплывающее окно с вопросом о завершении работы или просто ожидание нажатия кнопки
+            condition = False # обработка соглашения оператора завершенить работу
+            if condition:
+                self.is_operated = False
+            return time.time()
+        return timee
+
     def get_journals(self) -> dict[int: [Task]]:
         session = SessionLocal()
         result = {}
         not_found: list[tuple[str, str]] = []
         self.flights.sort()
-        while len(self.flights) > 0:
-            f = self.flights[0]
-            result[f.id] = []
-            start_point, end_point = 0, 0
-            if f.type == "A":  # Прилет
-                start_point = (
-                    session.query(Point)
-                    .filter(Point.locationId == f.parkingId)
-                    .one_or_none()
-                )
-                end_point = (
-                    session.query(Point)
-                    .filter(Point.locationId == f.gateId)
-                    .one_or_none()
-                )
-                start_point_scheme, end_point_scheme = f.parkingId, f.gateId
-            elif f.type == "D":
-                start_point = (
-                    session.query(Point)
-                    .filter(Point.locationId == f.gateId)
-                    .one_or_none()
-                )
-                end_point = (
-                    session.query(Point)
-                    .filter(Point.locationId == f.parkingId)
-                    .one_or_none()
-                )
-                start_point_scheme, end_point_scheme = f.gateId, f.parkingId
-            if start_point is None or end_point is None:
-                not_found.append((f.parkingId, f.gateId))
-                continue
-            bus = None
-            _expeption: list[int] = []
-            passengers_left = f.passengersCount
-            while passengers_left > 0:
-                try:
-                    bus_id = Controller._find_bus(
-                        self, start_point.locationId, _expeption)
-                    bus = session.query(Bus).filter_by(id=bus_id).one_or_none()
-                    if bus is None:
-                        tasks = session.query(Task).all()
-                        tasks.sort()
-                        delay = (tasks[0].startTime +
-                                 tasks[0].duration) - time()
-                        print(f"waiting: {delay}")
-                        time.sleep(delay)
-                        continue
-                    if bus.state:
-                        bus.state = False
-                        passengers_left -= bus.capacity
-                        session.add(bus)
-                        distance, duration = Controller.compute_distance(
-                            self, startPoint=start_point.pointId, endPoint=end_point.pointId,)
-                        t = Task(
-                            bus_id=bus_id,
-                            flight_id=f.id,
-                            distance=distance,
-                            startPoint=start_point.pointId,
-                            endPoint=end_point.pointId,
-                            startTime=int(time()),
-                            duration=duration,
-                        )
-                        session.add(t)
-                        session.flush()
-
-                        result[f.id].append(
-                            TaskScheme(
-                                id=t.id,
-                                bus_id=t.bus_id,
-                                bus_capacity=session.query(Bus).filter_by(
-                                    id=t.bus_id).one().capacity,
-                                duration=t.duration,
-                                distance=t.distance,
-                                startPoint=start_point_scheme,
-                                endPoint=end_point_scheme,
+        prev_time = -100
+        while self.is_operated:
+            while len(self.flights) > 0:
+                f = self.flights[0]
+                result[f.id] = []
+                start_point, end_point = 0, 0
+                if f.type == "A":  # Прилет
+                    start_point = (
+                        session.query(Point)
+                        .filter(Point.locationId == f.parkingId)
+                        .one_or_none()
+                    )
+                    end_point = (
+                        session.query(Point)
+                        .filter(Point.locationId == f.gateId)
+                        .one_or_none()
+                    )
+                    start_point_scheme, end_point_scheme = f.parkingId, f.gateId
+                elif f.type == "D":
+                    start_point = (
+                        session.query(Point)
+                        .filter(Point.locationId == f.gateId)
+                        .one_or_none()
+                    )
+                    end_point = (
+                        session.query(Point)
+                        .filter(Point.locationId == f.parkingId)
+                        .one_or_none()
+                    )
+                    start_point_scheme, end_point_scheme = f.gateId, f.parkingId
+                if start_point is None or end_point is None:
+                    not_found.append((f.parkingId, f.gateId))
+                    continue
+                bus = None
+                _expeption: list[int] = []
+                passengers_left = f.passengersCount
+                while passengers_left > 0:
+                    try:
+                        bus_id = Controller._find_bus(
+                            self, start_point.locationId, _expeption)
+                        bus = session.query(Bus).filter_by(id=bus_id).one_or_none()
+                        if bus is None:
+                            while bus is None:
+                                tasks = session.query(Task).all()
+                                tasks.sort()
+                            continue
+                        if bus.state:
+                            bus.state = False
+                            passengers_left -= bus.capacity
+                            session.add(bus)
+                            distance, duration = Controller.compute_distance(
+                                self, startPoint=start_point.pointId, endPoint=end_point.pointId,)
+                            t = Task(
+                                bus_id=bus_id,
+                                flight_id=f.id,
+                                distance=distance,
+                                startPoint=start_point.pointId,
+                                endPoint=end_point.pointId,
+                                startTime=int(time()),
+                                duration=duration,
                             )
-                        )
-                    else:
-                        _expeption.append(bus.id)
-                        continue
+                            session.add(t)
+                            session.flush()
 
-                except Exception as e:
-                    print(e)
-                    exit(0)
-            self.flights.pop(0)
+                            result[f.id].append(
+                                TaskScheme(
+                                    id=t.id,
+                                    bus_id=t.bus_id,
+                                    bus_capacity=session.query(Bus).filter_by(
+                                        id=t.bus_id).one().capacity,
+                                    duration=t.duration,
+                                    distance=t.distance,
+                                    startPoint=start_point_scheme,
+                                    endPoint=end_point_scheme,
+                                )
+                            )
+                        else:
+                            _expeption.append(bus.id)
+                            continue
+
+                    except Exception as e:
+                        print(e)
+                        exit(0)
+                self.flights.pop(0)
+            prev_time = self.warn_operator(prev_time)
         return result
 
     def compute_distance(self, startPoint: int, endPoint: int):
