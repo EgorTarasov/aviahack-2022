@@ -5,6 +5,11 @@ from pydantic import BaseModel, Json, Field
 from time import time
 
 
+class User(Base):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    
+
+
 class Flight(Base):
     __tablename__ = "flight"
     id = Column(Integer, primary_key=True, autoincrement=True)

@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Json, Field
 from typing import Optional
-from time import time
 
 
 class BusSchema(BaseModel):

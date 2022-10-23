@@ -3,7 +3,6 @@ import pandas as pd
 from models import *
 from sqlalchemy import select
 import random
-import time
 import datetime
 
 
@@ -32,13 +31,15 @@ def main():
             year=year, month=mounth, day=day, hour=hour, minute=minutes
         )
 
+        unix_timestamp = datetime.datetime.timestamp(date)*1000
+
         f = Flight(
             number=number,
-            date=(time.mktime(date.timetuple())),
+            date=unix_timestamp,
             type=_type,
             terminal=terminal,
             companyName=aviaCode,
-            scheduledTime=(time.mktime(date.timetuple())),
+            scheduledTime=unix_timestamp,
             airportCode=airportCode,
             airport=airportName,
             planeType=aircraftType,
@@ -57,7 +58,8 @@ def main():
         locationId = str(locationId)
         values.append((pointId, locationId))
         c += 1
-        point = Session.query(Point).filter_by(locationId=locationId).one_or_none()
+        point = Session.query(Point).filter_by(
+            locationId=locationId).one_or_none()
         if point is None:
             point = Point(pointId=pointId, locationId=locationId)
         Session.add(point)
