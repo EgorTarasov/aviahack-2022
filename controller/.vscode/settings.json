@@ -1,0 +1,13 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "Test",
+            "connectString": "postgresql://test_user:test_password@94.45.223.241:46873/test2?sslmode=disable"
+        }
+    ]
+}
