@@ -7,8 +7,12 @@ services:
       POSTGRES_USER: "test_user"
       POSTGRES_PASSWORD: "test_password"
     ports:
-        - "5432:5432"
+        - "46873:5432"
   web:
+    depends_on:
+        - "postgres"
     build: .
     ports:
-        - "8000:80"
+        - "8002:8000"
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
