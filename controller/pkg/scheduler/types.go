@@ -22,7 +22,7 @@ type Point struct {
 }
 
 type Journal struct {
-	ID          string `json:"id" db:"id"`
+	ID          int `json:"id" db:"id"`
 	Flight      int    `json:"flight" db:"flight"`
 	CurrentTask int    `json:"currentTask" db:"currentTask"`
 	BusId       int    `json:"bus_id" db:"bus_id"`
