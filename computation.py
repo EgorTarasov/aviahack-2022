@@ -81,14 +81,16 @@ class Controller:
             while bus is None:
                 try:
                     bus_id=Controller._find_bus(self, start_point.locationId, _expeption)
-                    bus = session.query(Bus).filter_by(state=True, id=bus_id).one_or_none()
+                    print(bus_id)
+                    bus = session.query(Bus).filter_by(id=bus_id).one_or_none()
+                    if bus.state:
+                        bus.state = False
+                        session.add(bus)
+                        break
                     if bus is None:
                         _expeption.append(bus_id)
                         continue
-                    bus.state = False
-                    session.add(bus)
-                    session.add(t)
-                    session.flush()
+                    
                 except Exception as e:
                     print(e)
                     exit(0)
@@ -107,7 +109,8 @@ class Controller:
                 startTime=int(time()),
                 duration=duration,
             )
-            
+            session.add(t)
+            session.flush()
 
             result.append(
                 TaskScheme(
@@ -154,14 +157,20 @@ class Controller:
         #print(point_locId, type(point_locId))
         
         buses = session.query(Bus).all() # FIXME: Rename buses
+        b = 0
         m = self.compute_distance(buses[-1].point, point_locId)[0]
         for i, bus in enumerate(buses):
             if bus.id not in _except:
                 length = self.compute_distance(bus.point, point_locId)[0]
-                print(length)
-                if length <= m:
+                b = bus.id
+                #print(length)
+                if length <= m and m != 0:
                     m = length
-        return m
+                    b = bus.id
+                elif m!= 0:
+                    break
+        
+        return b
 
 
 def main():
