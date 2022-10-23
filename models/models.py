@@ -1,19 +1,19 @@
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.dialects import postgresql
 from .loader import Base
 
 
 class Journal(Base):
     __tablename__ = "journal"
-    id = Column(Integer, primary_key=True)
-    flight = Column(Integer, ForeignKey("flight.number"))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    flight = Column(Integer, ForeignKey("flight.id"))
     currentTask = Column(Integer)
+    bus_id = Column(Integer, ForeignKey("bus.id"))
 
 
 class Flight(Base):
     __tablename__ = "flight"
-    number = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    number = Column(Integer)
     date = Column(Integer)
     type = Column(String)  # A - прилет, D - вылет
     terminal = Column(String)
@@ -31,8 +31,9 @@ class Flight(Base):
 
 class Bus(Base):
     __tablename__ = "bus"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     capacity = Column(Integer)
+    point = Column(String)
     state = Column(String)
 
 
@@ -46,17 +47,16 @@ class Road(Base):
 
 class Task(Base):
     __tablename__ = "task"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     journal = Column(Integer, ForeignKey("journal.id"))
-    taskState = Column(String)
+    # taskState = Column(String)
     busState = Column(String)
-    bus_id = Column(Integer, ForeignKey("bus.id"))
     distance = Column(Integer)  # метры
-    startPoint = Column(Integer)  # id точки начала
-    endPoint = Column(Integer)
+    startPoint = Column(Integer)  # Integer -> String
+    endPoint = Column(Integer)  # Integer -> String
 
 
 class Point(Base):
     __tablename__ = "points"
-    pointId = Column(String, primary_key=True)
-    locationId = Column(String)
+    pointId = Column(Integer)
+    locationId = Column(String, primary_key=True)

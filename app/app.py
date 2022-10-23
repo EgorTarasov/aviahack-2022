@@ -1,20 +1,23 @@
 """
 Task: https://app.swaggerhub.com/apis/c4412/croc-gamification/1.0.0#/auction/addAuctionState
 """
+from unittest import result
 from fastapi import FastAPI, Depends
 from app.shemas import *
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from fastapi import APIRouter
-from app.database import SessionLocal
-from app.models import *
-from random import randint
-import json
+from models import *
 
-router_bus = APIRouter()
+
 app = FastAPI()
 
 CAPACITY = (10, 50, 100)
+
+router_bus = APIRouter()
+
+# TODO bus counter
+# TODO all bus (для переназначения)
+# TODO post change bus in task
 
 
 @router_bus.get("/bus_counter")
@@ -56,14 +59,28 @@ async def get_journal(bus_id: int):
     return journals
 
 
-# TODO: полеты с журналами и автобусами
 app.include_router(router_bus, prefix="/bus", tags=["bus"])
 
+# TODO: полеты с журналами
+# TODO: journal by id
+
 router_flight = APIRouter()
-# @router_flight.get("/all ")
-# @app.get("/")
-# def read_root():
-#     return {"Hello": "World"}
+
+
+@router_flight.get("/all ")
+@app.get("/")
+async def get_all():
+    result = {}
+    Session = SessionLocal()
+    query = Session.query(Flight).all()
+    for entity in result:
+        result[entity.id] = {}
+
+        result[entity.id]["flight"] = FlightSchema.from_orm(entity)
+        result[entity.id]["journals"] = []
+    pass
+
+
 #
 #
 # @app.post("/auction")
