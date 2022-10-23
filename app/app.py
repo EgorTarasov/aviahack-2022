@@ -1,20 +1,23 @@
 """
 Task: https://app.swaggerhub.com/apis/c4412/croc-gamification/1.0.0#/auction/addAuctionState
 """
+from unittest import result
 from fastapi import FastAPI, Depends
 from app.shemas import *
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from fastapi import APIRouter
-from app.database import SessionLocal
-from app.models import *
-from random import randint
-import json
+from models import *
 
-router_bus = APIRouter()
+
 app = FastAPI()
 
 CAPACITY = (10, 50, 100)
+
+router_bus = APIRouter()
+
+# TODO bus counter
+# TODO all bus (для переназначения)
+# TODO post change bus in task
 
 
 @router_bus.get("/bus_counter")
@@ -33,37 +36,66 @@ async def get_bus_count():
 
     return answer
 
+@router_bus.get("/free")
+async def get_free_busses():
+    db = SessionLocal()
+    busses = [BusScheme(i) for i in db.query(Bus).filter_by(state=True)]
+    return busses
 
 @router_bus.get("/all")
 async def get_bus_all():
+    # Tested
     db = SessionLocal()
-    busses = db.execute(select(Bus))
+    busses = db.execute(select(Bus)).all()
     result = []
     for b in busses:
-        result.append(BusSchema.from_orm(b))
+        result.append(dict(b)["Bus"])
     return result
 
 
 #
-@router_bus.get("/journal/{id}")
-async def get_journal(bus_id: int):
+@router_bus.get("/tasks/{bus_id}")
+async def get_task(bus_id: int):
+    # Tested
     db = SessionLocal()
-    q = select(Task).where(bus_id=bus_id)
-    r = db.execute(q).all()
-    journals = [
-        db.execute(select(Journal).where(id=i.journal)).one_or_none() for i in r
-    ]
-    return journals
+    result = db.query(Task).filter_by(bus_id=bus_id).all()
+    return result
 
 
-# TODO: полеты с журналами и автобусами
 app.include_router(router_bus, prefix="/bus", tags=["bus"])
 
+# TODO: полеты с журналами
+# TODO: journal by id
+
 router_flight = APIRouter()
-# @router_flight.get("/all ")
-# @app.get("/")
-# def read_root():
-#     return {"Hello": "World"}
+
+
+@router_flight.get("/all")
+async def get_all():
+    # Tested
+    result = {}
+    Session = SessionLocal()
+    query = Session.query(Flight).all()
+    for entity in query:
+        result[entity.id] = {}
+
+        result[entity.id]["flight"] = FlightSchema.from_orm(entity)
+        result[entity.id]["tasks"] = [TaskScheme(
+                    id=i.id,
+                    bus_id=i.bus_id,
+                    bus_capacity=Session.query(Bus).filter_by(id=i.bus_id).one().capacity,
+                    duration=i.duration,
+                    distance=i.distance,
+                    startPoint=Session.query(Point).filter_by(pointId=i.startPoint).first().locationId,
+                    endPoint=Session.query(Point).filter_by(pointId=i.endPoint).first().locationId,
+                ) for i in Session.query(Task).filter_by(flight_id=entity.id).all()]
+    return result
+
+
+app.include_router(router_flight, prefix="/flight", tags=["flight"])
+
+
+router_flight
 #
 #
 # @app.post("/auction")

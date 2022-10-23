@@ -3,12 +3,12 @@ services:
   postgres:
     image: postgres:13.3
     environment:
-      POSTGRES_DB: "test"
+      POSTGRES_DB: "test2"
       POSTGRES_USER: "test_user"
       POSTGRES_PASSWORD: "test_password"
     ports:
         - "5432:5432"
-  web:
-    build: .
-    ports:
-        - "8000:80"
+#  web:
+#    build: .
+#    ports:
+#        - "8000:80"
