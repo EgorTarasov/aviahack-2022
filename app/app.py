@@ -7,9 +7,22 @@ from app.shemas import *
 from sqlalchemy import select
 from fastapi import APIRouter
 from models import *
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+
+origins = [
+    "http://0.0.0.0:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 CAPACITY = (10, 50, 100)
 
@@ -67,8 +80,6 @@ async def get_task(bus_id: int):
 
 app.include_router(router_bus, prefix="/bus", tags=["bus"])
 
-# TODO: полеты с журналами
-# TODO: journal by id
 
 router_flight = APIRouter()
 
@@ -105,6 +116,3 @@ async def get_all():
 
 
 app.include_router(router_flight, prefix="/flight", tags=["flight"])
-
-
-# router_flight

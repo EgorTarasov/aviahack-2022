@@ -1,11 +1,17 @@
+flights.xlsx
+points.xlsx
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 .idea
+.vscode
 
 # C extensions
 *.so
+foo.db
+flights.xlsx
+points.xlsx
 
 # Distribution / packaging
 .Python
