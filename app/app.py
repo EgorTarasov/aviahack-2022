@@ -12,16 +12,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-origins = [
-    "http://0.0.0.0:8000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 CAPACITY = (10, 50, 100)
@@ -90,10 +86,12 @@ async def get_all():
     result = []
     Session = SessionLocal()
     query = Session.query(Flight).all()
+    
+        
     for entity in query:
         a = {}
         tasks = []
-        print(entity.id)
+        
         for i in Session.query(Task).filter_by(flight_id=entity.id).all():
             t = TaskScheme(
                 id=i.id,
@@ -102,16 +100,17 @@ async def get_all():
                     id=i.bus_id).one().capacity,
                 duration=i.duration,
                 distance=i.distance,
-                startPoint=Session.query(Point).filter_by(
-                    pointId=i.startPoint).first().locationId,
-                endPoint=Session.query(Point).filter_by(
-                    pointId=i.endPoint).first().locationId,
+                startPoint=i.startPoint,
+                endPoint=i.endPoint,
             )
             tasks.append(t)
+
         a["flight"] = FlightSchema.from_orm(entity)
-        a["tasks"] = tasks
+        a["tasks"] = []
         print(len(tasks))
         result.append(a)
+
+    result = [(dict, dict)]
     return result
 
 
