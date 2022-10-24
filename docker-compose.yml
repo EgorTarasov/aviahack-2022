@@ -18,3 +18,25 @@ services:
         - DATABASE_URL=postgresql://prod_user:production@db:46873/prod_db
     extra_hosts:
         - "host.docker.internal:host-gateway"
+  front-web:
+    container_name: react_app_web_prod
+    image: react_app_web_prod:1.0.0
+    build:
+      context: frontend/web
+      target: production
+      dockerfile: Dockerfile
+    command: yarn run start
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+  front-mobile:
+    container_name: react_app_mobile_prod
+    image: react_app_mobile_prod:1.0.0
+    build:
+      context: frontend/mobile
+      target: production
+      dockerfile: Dockerfile
+    command: yarn run start
+    ports:
+      - 8081:8081
+    restart: unless-stopped
