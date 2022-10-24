@@ -7,9 +7,18 @@ from app.shemas import *
 from sqlalchemy import select
 from fastapi import APIRouter
 from models import *
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 CAPACITY = (10, 50, 100)
 
@@ -67,8 +76,6 @@ async def get_task(bus_id: int):
 
 app.include_router(router_bus, prefix="/bus", tags=["bus"])
 
-# TODO: полеты с журналами
-# TODO: journal by id
 
 router_flight = APIRouter()
 
@@ -79,10 +86,12 @@ async def get_all():
     result = []
     Session = SessionLocal()
     query = Session.query(Flight).all()
+    
+        
     for entity in query:
         a = {}
         tasks = []
-        print(entity.id)
+        
         for i in Session.query(Task).filter_by(flight_id=entity.id).all():
             t = TaskScheme(
                 id=i.id,
@@ -91,20 +100,18 @@ async def get_all():
                     id=i.bus_id).one().capacity,
                 duration=i.duration,
                 distance=i.distance,
-                startPoint=Session.query(Point).filter_by(
-                    pointId=i.startPoint).first().locationId,
-                endPoint=Session.query(Point).filter_by(
-                    pointId=i.endPoint).first().locationId,
+                startPoint=i.startPoint,
+                endPoint=i.endPoint,
             )
             tasks.append(t)
+
         a["flight"] = FlightSchema.from_orm(entity)
-        a["tasks"] = tasks
+        a["tasks"] = []
         print(len(tasks))
         result.append(a)
+
+    result = [(dict, dict)]
     return result
 
 
 app.include_router(router_flight, prefix="/flight", tags=["flight"])
-
-
-# router_flight
