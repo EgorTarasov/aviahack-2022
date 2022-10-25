@@ -11,13 +11,36 @@ services:
   web:
     depends_on:
         - "postgres"
-    build: .
+    build:
+        context: .
+        dockerfile: app/Dockerfile
     ports:
         - "8002:8000"
     environment:
-        - DATABASE_URL=postgresql://prod_user:production@db:46873/prod_db
+        - DATABASE_URL=postgresql://prod_user:production@postgres:5432/prod_db
     extra_hosts:
         - "host.docker.internal:host-gateway"
+  init:
+    depends_on:
+        - "postgres"
+        - "web"
+    build: 
+        context: . 
+        dockerfile: utils/Dockerfile
+    environment:
+        - DATABASE_URL=postgresql://prod_user:production@postgres:5432/prod_db
+
+  computations:
+    depends_on:
+        - "postgres"
+        - "web"
+        - "init"
+    build: 
+        context: .
+        dockerfile: controller/Dockerfile
+    environment:
+        - DATABASE_URL=postgresql://prod_user:production@postgres:5432/prod_db
+
   front-web:
     container_name: react_app_web_prod
     image: react_app_web_prod:1.0.0
